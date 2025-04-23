@@ -1,14 +1,17 @@
 # Tech News Feed Extension
 
-A simple Edge browser extension that shows the top 20 tech news articles in a clean, dark-themed interface.
+A modern Edge browser extension that shows the top 20 tech news articles in a clean, dark-themed interface. Opens in a new tab and can optionally be set as your new tab page.
 
 ## Features
 
-- Dark theme interface
+- Beautiful dark theme interface
 - Top 20 tech news articles from Hacker News
+- Opens in a new tab when clicking the extension icon
+- Optional new tab page setting with confirmation
+- Shows points, post time, and author
 - No login required
-- No data storage
-- Clean and simple UI
+- Minimal data storage (just new tab preference)
+- Responsive grid layout
 
 ## Installation
 
@@ -19,9 +22,10 @@ A simple Edge browser extension that shows the top 20 tech news articles in a cl
 
 ## Usage
 
-1. Click the extension icon in your browser toolbar
+1. Click the extension icon to open Tech News Feed in a new tab
 2. Browse through the latest tech news
 3. Click any article to open it in a new tab
+4. Optionally, click "Set as New Tab Page" to see Tech News Feed every time you open a new tab
 
 ## Development and Debugging
 

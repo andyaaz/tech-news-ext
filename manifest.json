@@ -3,9 +3,14 @@
   "name": "Tech News Feed",
   "version": "1.0",
   "description": "View latest tech news in a clean dark theme interface",
-  "permissions": ["activeTab"],
+  "permissions": ["storage", "tabs"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "chrome_url_overrides": {
+    "newtab": "src/index.html"
+  },
   "action": {
-    "default_popup": "src/popup.html",
     "default_icon": {
       "16": "src/icon16.png",
       "48": "src/icon48.png",
