@@ -54,10 +54,60 @@ async function handleSetHomepage() {
   }
 }
 
+// Store stories globally for sorting
+let currentStories = [];
+
+// Function to sort stories
+function sortStories(stories, sortBy) {
+  return [...stories].sort((a, b) => {
+    const [field, order] = sortBy.split('_');
+    const multiplier = order === 'asc' ? 1 : -1;
+    
+    if (field === 'time') {
+      return (a.time - b.time) * multiplier;
+    } else if (field === 'score') {
+      return (a.score - b.score) * multiplier;
+    }
+    return 0;
+  });
+}
+
+// Function to display stories
+function displayStories(stories) {
+  const newsList = document.getElementById('newsList');
+  newsList.innerHTML = '';
+
+  stories.forEach(story => {
+    if (story && story.url) {
+      const li = document.createElement('li');
+      li.className = 'news-item';
+      
+      const a = document.createElement('a');
+      a.href = story.url;
+      a.target = '_blank';
+      a.textContent = story.title;
+      
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = `${story.score} points • ${getRelativeTime(story.time)} • by ${story.by}`;
+      
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        chrome.tabs.create({ url: story.url });
+      });
+      
+      li.appendChild(a);
+      li.appendChild(meta);
+      newsList.appendChild(li);
+    }
+  });
+}
+
 // Main function to load news
 async function loadNews() {
   const newsList = document.getElementById('newsList');
   const errorDiv = document.getElementById('error');
+  const sortSelect = document.getElementById('sortBy');
 
   try {
     // Fetch news from Hacker News API
@@ -76,33 +126,14 @@ async function loadNews() {
         .then(response => response.json())
     );
     
-    const stories = await Promise.all(storyPromises);
+    currentStories = await Promise.all(storyPromises);
     
-    // Display stories with metadata
-    stories.forEach(story => {
-      if (story && story.url) {
-        const li = document.createElement('li');
-        li.className = 'news-item';
-        
-        const a = document.createElement('a');
-        a.href = story.url;
-        a.target = '_blank';
-        a.textContent = story.title;
-        
-        const meta = document.createElement('div');
-        meta.className = 'meta';
-        meta.textContent = `${story.score} points • ${getRelativeTime(story.time)} • by ${story.by}`;
-        
-        a.addEventListener('click', (e) => {
-          e.preventDefault();
-          chrome.tabs.create({ url: story.url });
-        });
-        
-        li.appendChild(a);
-        li.appendChild(meta);
-        newsList.appendChild(li);
-      }
-    });
+    // Filter out stories without URLs
+    currentStories = currentStories.filter(story => story && story.url);
+    
+    // Initial sort by current selection
+    const sortedStories = sortStories(currentStories, sortSelect.value);
+    displayStories(sortedStories);
     
     if (newsList.children.length === 0) {
       throw new Error('No stories found');
@@ -120,9 +151,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const setHomepageButton = document.getElementById('setHomepage');
   setHomepageButton.addEventListener('click', handleSetHomepage);
 
+  // Set up sort dropdown
+  const sortSelect = document.getElementById('sortBy');
+  sortSelect.addEventListener('change', () => {
+    if (currentStories.length > 0) {
+      const sortedStories = sortStories(currentStories, sortSelect.value);
+      displayStories(sortedStories);
+    }
+  });
+
   // Check if already set as homepage
-  const { isHomepage } = await chrome.storage.sync.get('isHomepage');
-  if (isHomepage) {
+  const { isNewTabPage } = await chrome.storage.sync.get('isNewTabPage');
+  if (isNewTabPage) {
     setHomepageButton.classList.add('active');
   }
 
